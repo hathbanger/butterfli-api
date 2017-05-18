@@ -5,6 +5,10 @@ api for a social network media aggregator
 
 Clone the repo to your $GOPATH.
 
+```
+go get
+```
+
 ### Prerequisites
 
 What things you need to install the software and how to install them
@@ -69,7 +73,7 @@ We use [SemVer](http://semver.org/) for versioning. For the versions available, 
 
 ## Authors
 
-* **Billie Thompson** - *Initial work* - [PurpleBooth](https://github.com/PurpleBooth)
+* **Andrew Hathaway** - *Initial work* - [hathbanger](https://github.com/hathbanger)
 
 See also the list of [contributors](https://github.com/your/project/contributors) who participated in this project.
 
