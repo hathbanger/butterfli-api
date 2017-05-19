@@ -13,7 +13,7 @@ type Account struct {
 	Timestamp 	time.Time	       `json:"time",bson:"time,omitempty"`
 	Title		string           	`json:"title",bson:"title,omitempty"`
 	Username	string           	`json:"username",bson:"username,omitempty"`
-	AccountCreds    []*AccountCreds		`json:"accountCreds",bson:"accountCreds,omitempty"`
+	AccountCreds    *AccountCreds		`json:"accountcreds",bson:"accountcreds,omitempty"`
 	// SearchTerms 	[]*SearchTerm		 `json:"searchterms",bson:"searchterms,omitempty"`
 	// FavoriteTerms 	[]*FavoriteTerm		 `json:"favoriteterms",bson:"favoriteterms,omitempty"`
 	// Posts 			[]*Post		 	`json:"posts",bson:"posts,omitempty"`
@@ -25,7 +25,7 @@ func NewAccountModel(username string, title string) *Account {
 	a.Timestamp = time.Now()
 	a.Username = username
 	a.Title = title
-	a.AccountCreds = []*AccountCreds{NewAccountCreds(username, title)}
+	a.AccountCreds = NewAccountCreds(username, title)
 
 	return a
 }
@@ -40,6 +40,7 @@ func (a *Account) Save() error {
 	if err != nil {
 		panic(err)
 	}
+	a.AccountCreds.Save()
 	err = collection.Insert(&Account{
 		Id: a.Id,
 		Timestamp: a.Timestamp,
@@ -52,26 +53,14 @@ func (a *Account) Save() error {
 
 	collection, err = store.ConnectToCollection(session, "users", []string{"username"})
 	if err != nil {panic(err)}
-
+	
 	err = collection.Update(bson.M{"username": a.Username}, bson.M{"$push": bson.M{"accounts": a}})
 
 	if err != nil {
 		return  err
 	}
 
-	//a.NewAccountCreds(a.Username, a.Title)
 
-	//
-	//collection, err = store.ConnectToCollection(session, "accountCreds", []string{"account", "username"})
-	//if err != nil {fmt.Print(err)}
-	//
-	//acctCreds := NewAccountCreds(a.Username, a.Title)
-	//
-	//err = collection.Update(bson.M{"id": acctCreds.Id}, bson.M{"set": bson.M{"account": a}})
-	//
-	//if err != nil {
-	//	return  err
-	//}
 	return nil
 }
 

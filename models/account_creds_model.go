@@ -4,7 +4,7 @@ import (
 	"gopkg.in/mgo.v2/bson"
 	"github.com/butterfli-api/store"
 	"time"
-	// "fmt"
+	"fmt"
 	//"go/doc"
 	//"labix.org/v2/mgo"
 	//"go/doc"
@@ -15,11 +15,12 @@ type AccountCreds struct {
 	Timestamp 	time.Time	       `json:"time",bson:"time,omitempty"`
 	Username	string           `json:"username",bson:"username,omitempty"`
 	Account		string           `json:"account",bson:"account,omitempty"`
-	ConsumerKey		string           `json:"-",bson:"consumerKey,omitempty"`
-	ConsumerSecret		string           `json:"-",bson:"consumerSecret,omitempty"`
-	AccessToken		string           `json:"-",bson:"accessToken,omitempty"`
-	AccessTokenSecret		string           `json:"-",bson:"accessTokenSecret,omitempty"`
+	ConsumerKey		string           `json:"consumerkey",bson:"consumerkey,omitempty"`
+	ConsumerSecret		string           `json:"consumersecret",bson:"consumersecret,omitempty"`
+	AccessToken		string           `json:"accesstoken",bson:"accesstoken,omitempty"`
+	AccessTokenSecret		string           `json:"accesstokensecret",bson:"accesstokensecret,omitempty"`
 }
+
 
 func NewAccountCreds(username string, account string) *AccountCreds {
 	a := new(AccountCreds)
@@ -36,7 +37,7 @@ func (a *AccountCreds) Save() error {
 	defer session.Close()
 	if err != nil {panic(err)}
 
-	collection, err := store.ConnectToCollection(session, "accountCreds", []string{"account", "username"})
+	collection, err := store.ConnectToCollection(session, "accounts", []string{"account"})
 	if err != nil {panic(err)}
 
 	accountCreds := &AccountCreds{
@@ -50,12 +51,67 @@ func (a *AccountCreds) Save() error {
 	return nil
 }
 
+
+
+func FindAccountCredsModel(username string, title string) (*AccountCreds, error) {
+	session, err := store.ConnectToDb()
+	defer session.Close()
+	collection, err := store.ConnectToCollection(session, "accounts", []string{"account"})
+	
+	account := Account{}
+	err = collection.Find(bson.M{"username": username, "title": title}).One(&account)
+	if err != nil {
+		fmt.Print(err)
+	}
+
+	return account.AccountCreds, err
+}
+
+
+func UpdateAccountCredsModel(username string, title string, consumerKey string, consumerSecret string, accessToken string, accessTokenSecret string) (*AccountCreds, error) {
+	account, err := FindAccountModel(username, title)
+	session, err := store.ConnectToDb()
+	creds := account.AccountCreds
+	defer session.Close()
+
+	collection, err := store.ConnectToCollection(session, "accounts", []string{"account"})
+
+
+	if err != nil {fmt.Print(err)}
+
+	colQuerier := bson.M{"id": account.Id}
+	change := bson.M{"$set": bson.M{ "accountcreds.consumerkey": newVar(creds.ConsumerKey, consumerKey), "accountcreds.consumersecret": newVar(creds.ConsumerSecret, consumerSecret), "accountcreds.accesstoken": newVar(creds.AccessToken, accessToken), "accountcreds.accesstokensecret": newVar(creds.AccessTokenSecret, accessTokenSecret)}}
+	err = collection.Update(colQuerier, change)
+
+	accCreds, err := FindAccountCredsModel(username, title)
+	account, err = FindAccountModel(username, title)
+	creds = account.AccountCreds
+	if err != nil {fmt.Print(err)}
+
+	fmt.Print(accCreds)
+
+	return creds, err
+}
+
+
+
+
+func newVar(a string, b string) string {
+    if b != "" {
+        return b
+    }
+    return a
+}
+
+
+
+
 // func UpdateAccountCreds(accountCreds string, consumerKey string, consumerSecret string, accessToken string, accessTokenSecret string) error {
 // 	session, err := store.ConnectToDb()
 // 	//if err != nil {panic(err)}
 
 
-// 	collection, err := store.ConnectToCollection(session, "accountCreds", []string{"account"})
+// 	collection, err := store.ConnectToCollection(session, "accounts", []string{"account"})
 // 	//if err != nil {panic(err)}
 
 
@@ -86,29 +142,13 @@ func (a *AccountCreds) Save() error {
 // }
 
 
-// func FindAccountCredsById(accountCredsId string) (*AccountCreds, error) {
-// 	session, err := store.ConnectToDb()
-// 	defer session.Close()
-// 	if err != nil {panic(err)}
-
-// 	collection, err := store.ConnectToCollection(session, "accountCreds", []string{"imgurl"})
-// 	if err != nil {panic(err)}
-
-// 	accountCreds := AccountCreds{}
-// 	err = collection.Find(bson.M{"id": bson.ObjectIdHex(accountCredsId)}).One(&accountCreds)
-// 	if err != nil {panic(err)}
-
-// 	return &accountCreds, err
-// }
-
-
 // func FindAccountCredsByAccountId(accountId string) (*AccountCreds, error) {
 // 	session, err := store.ConnectToDb()
 // 	defer session.Close()
 // 	if err != nil {panic(err)}
 
 // 	fmt.Print("bout to do FindAccountCredsByAccountId!")
-// 	collection, err := store.ConnectToCollection(session, "accountCreds", []string{"account"})
+// 	collection, err := store.ConnectToCollection(session, "accounts", []string{"account"})
 // 	if err != nil {
 // 		fmt.Print("error finding collection")
 // 		fmt.Print(err)

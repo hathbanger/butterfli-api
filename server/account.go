@@ -54,18 +54,32 @@ func DeleteAccountController(c echo.Context) error {
 }
 
 
-func CreateAccountCreds(c echo.Context) error {
+
+
+func FindAccountCredsController(c echo.Context) error {
 	username := c.Param("username")
 	acctTitle := c.Param("title")
-	account, err := models.FindAccountModel(username, acctTitle)
-	// consumerKey := c.FormValue("consumerKey")
-	// consumerSecret := c.FormValue("consumerSecret")
-	// accessToken := c.FormValue("accessToken")
-	// accessTokenSecret := c.FormValue("accessTokenSecret")
-	accountCreds := models.NewAccountCreds(username, account.Id.Hex())
-	err = accountCreds.Save()
+	accountCreds, err := models.FindAccountCredsModel(username, acctTitle)
+
 	if err != nil {
-		return c.JSON(http.StatusForbidden, "We're sorry! There's already creds like those..")
+		return c.JSON(http.StatusForbidden, "We're sorry! There was an issue finding your acct creds..")
+	}
+
+	return c.JSON(http.StatusOK, accountCreds)
+}
+
+
+func UpdateAccountCredsController(c echo.Context) error {
+	username := c.Param("username")
+	acctTitle := c.Param("title")
+	newConsumerKey := c.FormValue("consumerKey")
+	newConsumerSecret := c.FormValue("consumerSecret")
+	newAccessToken := c.FormValue("accessToken")
+	newAccessTokenSecret := c.FormValue("accessTokenSecret")
+	accountCreds, err := models.UpdateAccountCredsModel(username, acctTitle, newConsumerKey, newConsumerSecret, newAccessToken, newAccessTokenSecret)
+
+	if err != nil {
+		return c.JSON(http.StatusForbidden, "We're sorry! There was an issue updating your account credentials..")
 	}
 
 	return c.JSON(http.StatusOK, accountCreds)

@@ -45,7 +45,8 @@ func Run() {
 	e.POST("/:username/accounts/delete/:title", DeleteAccountController)
 
 
-	e.POST("/:username/accounts/:title/account-creds", CreateAccountCreds)
+	e.GET("/:username/accounts/:title/account-creds", FindAccountCredsController)
+	e.POST("/:username/accounts/:title/account-creds", EditAccountCredsController)
 
 
 	// e.GET("/:username/accounts", GetAllAccountsByUsername)
