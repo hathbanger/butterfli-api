@@ -30,11 +30,11 @@ func GetAccountController(c echo.Context) error {
 }
 
 
-func EditAccountController(c echo.Context) error {
+func UpdateAccountController(c echo.Context) error {
 	username := c.Param("username")
 	oldTitle := c.Param("title")
 	newTitle := c.FormValue("title")
-	models.EditAccountModel(username, oldTitle, newTitle)
+	models.UpdateAccountModel(username, oldTitle, newTitle)
 	account, err := models.FindAccountModel(username, newTitle)
 	if err != nil {
 		return err

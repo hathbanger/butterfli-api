@@ -34,19 +34,23 @@ func Run() {
 	e.POST("/login", LoginUserController)
 	e.POST("/user", CreateUserController)
 	e.GET("/:username", GetUserController)
-	e.POST("/:username/update", EditUserController)
+	e.POST("/:username/update", UpdateUserController)
 	e.POST("/:username/delete", RemoveUserController)
 
 
 	
 	e.POST("/:username/accounts/create", CreateAccountController)
 	e.GET("/:username/accounts/:title", GetAccountController)
-	e.POST("/:username/accounts/update/:title", EditAccountController)
+	e.POST("/:username/accounts/update/:title", UpdateAccountController)
 	e.POST("/:username/accounts/delete/:title", DeleteAccountController)
 
 
 	e.GET("/:username/accounts/:title/account-creds", FindAccountCredsController)
-	e.POST("/:username/accounts/:title/account-creds", EditAccountCredsController)
+	e.POST("/:username/accounts/:title/account-creds", UpdateAccountCredsController)
+
+
+	e.POST("/:username/accounts/:acctTitle/search/:socialNetwork", SearchController)
+	e.POST("/:username/accounts/:acctTitle/favorite/:socialNetwork", SearchAndFavorite)
 
 
 	// e.GET("/:username/accounts", GetAllAccountsByUsername)
@@ -54,7 +58,6 @@ func Run() {
 	// e.GET("/:username/accounts/:account_id/posts", FindAllAccountPosts)
 	// e.GET("/:username/accounts/:accountId/search/:socialNetwork/:searchTerm", SearchController)
 
-	// e.POST("/:username/accounts/:accountId/search/:socialNetwork/:searchTerm", SearchAndFavorite)
 
 
 	// e.POST("/user", CreateUser)

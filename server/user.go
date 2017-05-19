@@ -55,10 +55,10 @@ func GetUserController(c echo.Context) error {
 	return c.JSON(http.StatusOK, user)
 }
 
-func EditUserController(c echo.Context) error {
+func UpdateUserController(c echo.Context) error {
 	username := c.Param("username")
 	password := c.FormValue("password")
-	models.EditUserModel(username, password)
+	models.UpdateUserModel(username, password)
 	user, err := models.FindUserModel(username)
 	if err != nil {
 		return err

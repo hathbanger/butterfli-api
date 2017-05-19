@@ -65,7 +65,7 @@ func FindUserModel(username string) (User, error) {
 }
 
 
-func EditUserModel(username string, password string) (User, error) {
+func UpdateUserModel(username string, password string) (User, error) {
 	user, err := FindUserModel(username)
 	session, err := store.ConnectToDb()
 	defer session.Close()

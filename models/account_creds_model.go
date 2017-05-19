@@ -83,12 +83,9 @@ func UpdateAccountCredsModel(username string, title string, consumerKey string, 
 	change := bson.M{"$set": bson.M{ "accountcreds.consumerkey": newVar(creds.ConsumerKey, consumerKey), "accountcreds.consumersecret": newVar(creds.ConsumerSecret, consumerSecret), "accountcreds.accesstoken": newVar(creds.AccessToken, accessToken), "accountcreds.accesstokensecret": newVar(creds.AccessTokenSecret, accessTokenSecret)}}
 	err = collection.Update(colQuerier, change)
 
-	accCreds, err := FindAccountCredsModel(username, title)
 	account, err = FindAccountModel(username, title)
 	creds = account.AccountCreds
 	if err != nil {fmt.Print(err)}
-
-	fmt.Print(accCreds)
 
 	return creds, err
 }

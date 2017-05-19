@@ -14,9 +14,9 @@ type Account struct {
 	Title		string           	`json:"title",bson:"title,omitempty"`
 	Username	string           	`json:"username",bson:"username,omitempty"`
 	AccountCreds    *AccountCreds		`json:"accountcreds",bson:"accountcreds,omitempty"`
+	Posts 			[]*Post		 	`json:"posts",bson:"posts,omitempty"`
 	// SearchTerms 	[]*SearchTerm		 `json:"searchterms",bson:"searchterms,omitempty"`
 	// FavoriteTerms 	[]*FavoriteTerm		 `json:"favoriteterms",bson:"favoriteterms,omitempty"`
-	// Posts 			[]*Post		 	`json:"posts",bson:"posts,omitempty"`
 }
 
 func NewAccountModel(username string, title string) *Account {
@@ -53,7 +53,7 @@ func (a *Account) Save() error {
 
 	collection, err = store.ConnectToCollection(session, "users", []string{"username"})
 	if err != nil {panic(err)}
-	
+
 	err = collection.Update(bson.M{"username": a.Username}, bson.M{"$push": bson.M{"accounts": a}})
 
 	if err != nil {
@@ -84,7 +84,7 @@ func FindAccountModel(username string, title string) (*Account, error) {
 }
 
 
-func EditAccountModel(username string, oldTitle string, newTitle string) (*Account, error) {
+func UpdateAccountModel(username string, oldTitle string, newTitle string) (*Account, error) {
 	account, err := FindAccountModel(username, oldTitle)
 	session, err := store.ConnectToDb()
 	defer session.Close()
