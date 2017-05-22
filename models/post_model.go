@@ -4,6 +4,7 @@ import (
 	"labix.org/v2/mgo/bson"
 	"time"
 	"github.com/butterfli-api/store"
+	"fmt"
 )
 
 
@@ -15,10 +16,10 @@ type Post struct {
 	Account		string           `json:"account",bson:"account,omitempty"`
 	Imgurl		string           `json:"imgurl",bson:"imgurl,omitempty"`
 	Title		string           `json:"title",bson:"title,omitempty"`
-	// SearchTerm	SearchTerm           `json:"searchterm",bson:"searchterm,omitempty"`
 	OGSourceId	int64		`json:"ogSourceId",bson:"ogSourceId,omitempty"`
 	Approved	bool           `json:"approved",bson:"approved,omitempty"`
 	Rated		bool           `json:"rated",bson:"rated,omitempty"`
+	// SearchTerm	SearchTerm           `json:"searchterm",bson:"searchterm,omitempty"`
 }
 
 func NewPost(username string, accountTitle string, title string, ogSourceId int64, imgUrl string) *Post {
@@ -66,7 +67,7 @@ func (p *Post) Save() error {
 	collection, err = store.ConnectToCollection(session, "accounts", []string{"username", "title"})
 	if err != nil {panic(err)}
 
-	err = collection.Update(bson.M{"username": p.Username, "title": p.Title}, bson.M{"$push": bson.M{"posts": post}})
+	err = collection.Update(bson.M{"title": p.Account}, bson.M{"$push": bson.M{"posts": post}})
 
 	if err != nil {
 		return  err
@@ -75,24 +76,64 @@ func (p *Post) Save() error {
 	return nil
 }
 
+func FindPostById(accountId string, postId string) (*Post, error) {
+	session, err := store.ConnectToDb()
+	defer session.Close()
+	if err != nil {
+		panic(err)
+	}
+	collection, err := store.ConnectToCollection(session, "accounts", []string{"username", "title"})
+	if err != nil {
+		panic(err)
+	}
 
-// func FindPostById(post_id string) (*Post, error) {
+	fmt.Print("about to look")
+
+	post := Post{}
+	err = collection.Update(bson.M{"id": bson.ObjectIdHex(accountId)}, bson.M{"$set": bson.M{"posts.$.approved": true}})
+	fmt.Print(err)
+	if err != nil {
+		return &post, err
+	}
+	return &post, err
+}
+
+
+// func ApprovePostById(postId string) error {
 // 	session, err := store.ConnectToDb()
-// 	defer session.Close()
+	
+	
+// 	collection, err := store.ConnectToCollection(session, "accounts", []string{"username", "title"})
+
+// 	// colQuerier := bson.M{"id": bson.ObjectIdHex(postId)}
+// 	// change := bson.M{"$set": bson.M{ "approved": true, "rated": true }}
+
+// 	response := collection.Find(bson.M{"_id": bson.ObjectIdHex(postId)})
+
+// 	fmt.Print(response)
+// 	// err = collection.Update(colQuerier, bson.M{"$set": bson.M{ "approved": true, "rated": true }})
 // 	if err != nil {
-// 		panic(err)
+// 		fmt.Print(err)
 // 	}
-// 	collection, err := store.ConnectToCollection(session, "posts", []string{"account", "imgurl"})
-// 	if err != nil {
-// 		panic(err)
-// 	}
-// 	post := Post{}
-// 	err = collection.Find(bson.M{"id": bson.ObjectIdHex(post_id)}).One(&post)
-// 	if err != nil {
-// 		return &post, err
-// 	}
-// 	return &post, err
+// 	return nil
 // }
+
+// func ApprovePostById(postId string) error {
+// 	session, err := store.ConnectToDb()
+	
+// 	collection := session.DB("test").C("posts")
+
+// 	colQuerier := bson.M{"id": bson.ObjectIdHex(postId)}
+// 	change := bson.M{"$set": bson.M{ "approved": true, "rated": true }}
+// 	err = collection.Update(colQuerier, change)
+// 	if err != nil {
+// 		panic(err)
+// 	}
+// 	return nil
+// }
+
+
+
 
 // func GetAllAccountPosts(accountId string) ([]*Post, error){
 // 	session, err := store.ConnectToDb()
@@ -129,17 +170,7 @@ func (p *Post) Save() error {
 // 	return nil
 // }
 
-// func ApprovePostById(postId string) error {
-// 	session, err := store.ConnectToDb()
-// 	collection := session.DB("test").C("posts")
-// 	colQuerier := bson.M{"id": bson.ObjectIdHex(postId)}
-// 	change := bson.M{"$set": bson.M{ "approved": true, "rated": true }}
-// 	err = collection.Update(colQuerier, change)
-// 	if err != nil {
-// 		panic(err)
-// 	}
-// 	return nil
-// }
+
 
 // func DisapprovePostById(postId string) error {
 // 	session, err := store.ConnectToDb()

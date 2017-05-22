@@ -84,6 +84,25 @@ func FindAccountModel(username string, title string) (*Account, error) {
 }
 
 
+func FindAccountModelId(accountId string) (*Account, error) {
+	session, err := store.ConnectToDb()
+	defer session.Close()
+	if err != nil {
+		panic(err)
+	}
+	collection, err := store.ConnectToCollection(session, "accounts", []string{"title", "username"})
+	if err != nil {
+		panic(err)
+	}
+	account := Account{}
+	err = collection.Find(bson.M{"id": bson.ObjectIdHex(accountId)}).One(&account)
+	if err != nil {
+		panic(err)
+	}
+	return &account, err
+}
+
+
 func UpdateAccountModel(username string, oldTitle string, newTitle string) (*Account, error) {
 	account, err := FindAccountModel(username, oldTitle)
 	session, err := store.ConnectToDb()
