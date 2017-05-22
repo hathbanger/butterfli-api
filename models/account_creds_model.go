@@ -2,7 +2,7 @@ package models
 
 import (
 	"gopkg.in/mgo.v2/bson"
-	"github.com/butterfli-api/store"
+	"github.com/hathbanger/butterfli-api/store"
 	"time"
 	"fmt"
 	//"go/doc"

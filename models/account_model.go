@@ -3,7 +3,7 @@ package models
 import (
 	"time"
 	"gopkg.in/mgo.v2/bson"
-	"github.com/butterfli-api/store"
+	"github.com/hathbanger/butterfli-api/store"
 	// "labix.org/v2/mgo"
 	"fmt"
 )

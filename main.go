@@ -1,7 +1,7 @@
 package main
 
 import (
-	"github.com/butterfli-api/server"
+	"github.com/hathbanger/butterfli-api/server"
 )
 
 func main() {

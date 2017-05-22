@@ -3,7 +3,7 @@ package server
 import (
 	"github.com/labstack/echo"
 	"net/http"
-	"github.com/butterfli-api/models"
+	"github.com/hathbanger/butterfli-api/models"
 	//"fmt"
 )
 
