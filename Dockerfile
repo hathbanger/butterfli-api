@@ -1,6 +1,5 @@
 FROM golang:latest
 
-
 WORKDIR /go/src/github.com/hathbanger/butterfli-api
 
 RUN curl https://glide.sh/get | sh
