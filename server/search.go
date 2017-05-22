@@ -34,7 +34,7 @@ func SearchController(c echo.Context) error {
 func Search(username string, acctTitle string, socialNetwork string, searchTerm string) anaconda.SearchResponse {
 	switch socialNetwork {
 	case "twitter-img":
-		return SearchTwitter(username, acctTitle, searchTerm, "30", " filter:twimg")
+		return SearchTwitter(username, acctTitle, searchTerm, "100", " filter:twimg")
 	default:
 		panic("unrecognized escape character")
 	}
@@ -73,7 +73,7 @@ func SearchAndFavorite(c echo.Context) error {
 	v := url.Values{}
 	// s := strconv.FormatInt(favoriteTerm.SinceTweetId, 10)
 	// v.Set("since_id", s)
-	v.Add("count", "30")
+	v.Add("count", "100")
 	// updatedSearch := favoriteTerm.Text
 	search_result, err := api.GetSearch(searchTermString, v)
 	if err != nil {panic(err)}

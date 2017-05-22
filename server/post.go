@@ -4,6 +4,8 @@ import (
 	// "github.com/labstack/echo"
 	// "net/http"
 	"github.com/hathbanger/butterfli-api/models"
+	"github.com/labstack/echo"
+	"net/http"
 	"fmt"
 	// "io/ioutil"
 	// "encoding/base64"
@@ -39,6 +41,16 @@ func CreatePostFromResults(username string, accountTitle string, searchTerm stri
 	return results
 }
 
+func FindPostController(c echo.Context) error {
+	accountId := c.Param("accountId")
+	postId := c.Param("postId")
+	post, err := models.FindPostById(accountId, postId)
+	if err != nil {
+		return c.JSON(http.StatusNotFound, "not found")
+	}
+	return c.JSON(http.StatusOK, post)
+}
+
 // func FindAllAccountPosts(c echo.Context) error {
 // 	accountId := c.Param("account_id")
 // 	posts, err := models.GetAllAccountPosts(accountId)
@@ -59,14 +71,7 @@ func CreatePostFromResults(username string, accountTitle string, searchTerm stri
 // 	return c.JSON(http.StatusOK, "approved!")
 // }
 
-// func ApprovePost(c echo.Context) error {
-// 	postId := c.Param("postId")
-// 	err := models.ApprovePostById(postId)
-// 	if err != nil {
-// 		return c.JSON(http.StatusNotFound, "not approved")
-// 	}
-// 	return c.JSON(http.StatusOK, "approved!")
-// }
+
 
 // func DisapprovePost(c echo.Context) error {
 // 	postId := c.Param("postId")

@@ -32,11 +32,11 @@ func Run() {
 
 
 	e.POST("/login", LoginUserController)
+
 	e.POST("/user", CreateUserController)
 	e.GET("/:username", GetUserController)
 	e.POST("/:username/update", UpdateUserController)
 	e.POST("/:username/delete", RemoveUserController)
-
 
 	
 	e.POST("/:username/accounts/create", CreateAccountController)
@@ -53,9 +53,11 @@ func Run() {
 	e.POST("/:username/accounts/:acctTitle/favorite/:socialNetwork", SearchAndFavorite)
 
 
+	e.GET("/:accountId/posts/:postId", FindPostController)
+	// e.POST("/post/approve/:postId", ApprovePostController)
+
 	// e.GET("/:username/accounts", GetAllAccountsByUsername)
 	// e.GET("/users", GetAllUsers)
-	// e.GET("/:username/accounts/:account_id/posts", FindAllAccountPosts)
 	// e.GET("/:username/accounts/:accountId/search/:socialNetwork/:searchTerm", SearchController)
 
 
@@ -64,7 +66,6 @@ func Run() {
 
 
 	// e.POST("/post/edit/:postId/title/:title", EditPost)
-	// e.POST("/post/approve/:postId", ApprovePost)
 	// e.POST("/post/disapprove/:postId", DisapprovePost)
 	// e.POST("/:username/accounts/:account_id/post/delete/:postId", RemovePost)
 	// e.POST("/:username/accounts/:account_id/post/:postId/upload/twitter/:tweetText", PostTweet)
