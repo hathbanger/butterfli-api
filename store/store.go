@@ -2,11 +2,15 @@ package store
 
 import (
 	"labix.org/v2/mgo"
+	"os"
 	"fmt"
 )
 
 func ConnectToDb() (*mgo.Session, error) {
-	session, err := mgo.Dial("localhost")
+	hostname := os.Getenv("MONGO_PORT_27017_TCP_ADDR")
+	port := os.Getenv("MONGO_PORT_27017_TCP_PORT")
+	url := hostname + ":" + port
+	session, err := mgo.Dial(url)
 	if err != nil {panic(err)}
 
 	return session, err
