@@ -1,14 +1,20 @@
-api:  
-  build: ./
-  ports: 
-    - 3000:3000
-  volumes:
-    - ./butterfli-api:/go/src/github.com/hathbanger/butterfli-api
-  links:
-    - database
-  environment:
-    - DB_NAME=project
-
-database:  
-  image: mongo:3.0
-  command: mongod --smallfiles --quiet --logpath=/dev/null
+version: "3"
+services:
+  web:
+    image: hathbanger/butterfli-api
+    deploy:
+      replicas: 5
+      resources:
+        limits:
+          cpus: "0.1"
+          memory: 50M
+      restart_policy:
+        condition: on-failure
+    ports:
+      - "1323:1323"
+    networks:
+      - webnet
+  hello-mgo-mongo:
+    image: mongo
+networks:
+  webnet:

@@ -1,3 +1,4 @@
+
 FROM golang:latest
 
 WORKDIR /go/src/github.com/hathbanger/butterfli-api
@@ -17,4 +18,4 @@ RUN go install github.com/hathbanger/butterfli-api
 ENTRYPOINT /go/bin/butterfli-api
 
 # Expose default port (3000)
-EXPOSE 3000 
+EXPOSE 1323
