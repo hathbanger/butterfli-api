@@ -61,7 +61,9 @@ func (a *Account) Save() error {
 	}
 
 	err = collection.Update(
-		bson.M{"username": a.Username}, bson.M{"$push": bson.M{"accounts": a}})
+		bson.M{"username": a.Username},
+		bson.M{"$push": bson.M{"accounts": a}},
+	)
 	if err != nil {
 		return  err
 	}

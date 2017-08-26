@@ -26,6 +26,8 @@ func Run() {
 		AllowMethods: []string{echo.GET, echo.PUT, echo.POST, echo.DELETE},
 	}))
 
+	// TODO: Implement restful architecture
+
 	// ROUTES
 	e.GET("/", accessible)
 	r.GET("", restricted)
