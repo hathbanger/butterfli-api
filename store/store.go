@@ -7,18 +7,24 @@ import (
 )
 
 func ConnectToDb() (*mgo.Session, error) {
+
 	hostname := os.Getenv("MONGO_PORT_27017_TCP_ADDR")
 	port := os.Getenv("MONGO_PORT_27017_TCP_PORT")
 	url := hostname + ":" + port
 	session, err := mgo.Dial(url)
-	if err != nil {panic(err)}
+	if err != nil {
+		panic(err)
+	}
 
 	return session, err
 }
 
-func ConnectToCollection(session *mgo.Session, collection_str string, keyString []string) (*mgo.Collection, error) {
-	collection := session.DB("butterfli").C(collection_str)
+func ConnectToCollection(
+	session *mgo.Session,
+	collection_str string,
+	keyString []string) (*mgo.Collection, error) {
 
+	collection := session.DB("butterfli").C(collection_str)
 	index := mgo.Index{
 		Key:        keyString,
 		Unique:     true,

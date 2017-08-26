@@ -8,29 +8,40 @@ import (
 )
 
 func CreateAccountController(c echo.Context) error {
+
 	username := c.Param("username")
 	title := c.FormValue("title")
 	account := models.NewAccountModel(username, title)
 	err := account.Save()
 	if err != nil {
-		return c.JSON(http.StatusForbidden, "We're sorry! We couldn't create an account for you.")
+		return c.JSON(
+			http.StatusForbidden,
+			"We're sorry! We couldn't create an account for you.",
+		)
 	}
+
 	return c.JSON(http.StatusOK, account)
 }
 
 
 func GetAccountController(c echo.Context) error {
+
 	username := c.Param("username")
 	title := c.Param("title")
 	account, err := models.FindAccountModel(username, title)
 	if err != nil {
-		return c.JSON(http.StatusForbidden, "We're sorry! We couldn't get the account for you.")
+		return c.JSON(
+			http.StatusForbidden,
+			"We're sorry! We couldn't get the account for you.",
+		)
 	}
+
 	return c.JSON(http.StatusOK, account)
 }
 
 
 func UpdateAccountController(c echo.Context) error {
+
 	username := c.Param("username")
 	oldTitle := c.Param("title")
 	newTitle := c.FormValue("title")
@@ -38,16 +49,19 @@ func UpdateAccountController(c echo.Context) error {
 	account, err := models.FindAccountModel(username, newTitle)
 	if err != nil {
 		return err
-	}	
+	}
+
 	return c.JSON(http.StatusOK, account)
 }
 
 func DeleteAccountController(c echo.Context) error {
+
 	username := c.Param("username")
 	title := c.Param("title")
 	err := models.DeleteAccountModel(username, title)
 	if err != nil {
-		return c.JSON(http.StatusNotFound, "not able to remove the account..")
+		return c.JSON(
+			http.StatusNotFound, "not able to remove the account..")
 	}
 
 	return c.JSON(http.StatusOK, "Account deleted!")	
@@ -60,9 +74,11 @@ func FindAccountCredsController(c echo.Context) error {
 	username := c.Param("username")
 	acctTitle := c.Param("title")
 	accountCreds, err := models.FindAccountCredsModel(username, acctTitle)
-
 	if err != nil {
-		return c.JSON(http.StatusForbidden, "We're sorry! There was an issue finding your acct creds..")
+		return c.JSON(
+			http.StatusForbidden, "" +
+				"We're sorry! There was an issue finding your acct creds..",
+		)
 	}
 
 	return c.JSON(http.StatusOK, accountCreds)
@@ -76,10 +92,22 @@ func UpdateAccountCredsController(c echo.Context) error {
 	newConsumerSecret := c.FormValue("consumerSecret")
 	newAccessToken := c.FormValue("accessToken")
 	newAccessTokenSecret := c.FormValue("accessTokenSecret")
-	accountCreds, err := models.UpdateAccountCredsModel(username, acctTitle, newConsumerKey, newConsumerSecret, newAccessToken, newAccessTokenSecret)
+	accountCreds, err := models.UpdateAccountCredsModel(
+		username,
+		acctTitle,
+		newConsumerKey,
+		newConsumerSecret,
+		newAccessToken,
+		newAccessTokenSecret,
+	)
+
+	//TODO: shorten error messages
 
 	if err != nil {
-		return c.JSON(http.StatusForbidden, "We're sorry! There was an issue updating your account credentials..")
+		return c.JSON(
+			http.StatusForbidden,
+			"We're sorry! There was an issue updating your account credentials..",
+		)
 	}
 
 	return c.JSON(http.StatusOK, accountCreds)

@@ -17,7 +17,13 @@ import (
 )
 
 
-func CreatePostFromResults(username string, accountTitle string, searchTerm string, socialNetwork string, results anaconda.SearchResponse) anaconda.SearchResponse {
+func CreatePostFromResults(
+	username string,
+	accountTitle string,
+	searchTerm string,
+	socialNetwork string,
+	results anaconda.SearchResponse) anaconda.SearchResponse {
+
 	var sinceTweetId = int64(0)
 	var count = 0
 	for _, tweet := range results.Statuses {
@@ -28,11 +34,13 @@ func CreatePostFromResults(username string, accountTitle string, searchTerm stri
 			strArr := strings.Split(tweet.Text, " ")
 			fmt.Printf("%q\n", strArr[:len(strArr) - 1])
 			fmt.Print("%q\n", len(strArr))
-			post := models.NewPost(username, accountTitle, tweet.Text, sinceTweetId, imgurl)
+			post := models.NewPost(
+				username, accountTitle, tweet.Text, sinceTweetId, imgurl)
 			err := post.Save()
 			if err != nil {
 				fmt.Print(" - - > Duplicate! \n")
 			}
+
 		}
 	}
 	// models.UpdateSearchTerm(searchTerm, sinceTweetId)
@@ -48,6 +56,7 @@ func FindPostController(c echo.Context) error {
 	if err != nil {
 		return c.JSON(http.StatusNotFound, "not found")
 	}
+
 	return c.JSON(http.StatusOK, post)
 }
 
