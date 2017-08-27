@@ -10,19 +10,25 @@ import (
 
 type Post struct {
 	//BaseModel
-	Id 		bson.ObjectId          `json:"id",bson:"_id,omitempty"`
-	Timestamp 	time.Time	       `json:"time",bson:"time,omitempty"`
-	Username	string           `json:"username",bson:"username,omitempty"`
-	Account		string           `json:"account",bson:"account,omitempty"`
-	Imgurl		string           `json:"imgurl",bson:"imgurl,omitempty"`
-	Title		string           `json:"title",bson:"title,omitempty"`
-	OGSourceId	int64		`json:"ogSourceId",bson:"ogSourceId,omitempty"`
-	Approved	bool           `json:"approved",bson:"approved,omitempty"`
-	Rated		bool           `json:"rated",bson:"rated,omitempty"`
+	Id 			bson.ObjectId 		`json:"id",bson:"_id,omitempty"`
+	Timestamp 	time.Time	       	`json:"time",bson:"time,omitempty"`
+	Username	string           	`json:"username",bson:"username,omitempty"`
+	Account		string           	`json:"account",bson:"account,omitempty"`
+	Imgurl		string           	`json:"imgurl",bson:"imgurl,omitempty"`
+	Title		string           	`json:"title",bson:"title,omitempty"`
+	OGSourceId	int64				`json:"ogSourceId",bson:"ogSourceId,omitempty"`
+	Approved	bool           		`json:"approved",bson:"approved,omitempty"`
+	Rated		bool           		`json:"rated",bson:"rated,omitempty"`
 	// SearchTerm	SearchTerm           `json:"searchterm",bson:"searchterm,omitempty"`
 }
 
-func NewPost(username string, accountTitle string, title string, ogSourceId int64, imgUrl string) *Post {
+func NewPost(
+	username string,
+	accountTitle string,
+	title string,
+	ogSourceId int64,
+	imgUrl string) *Post {
+
 	p := new(Post)
 	p.Id = bson.NewObjectId()
 	p.Timestamp = time.Now()
@@ -38,15 +44,19 @@ func NewPost(username string, accountTitle string, title string, ogSourceId int6
 }
 
 func (p *Post) Save() error {
+
 	session, err := store.ConnectToDb()
 	defer session.Close()
 	if err != nil {
 		panic(err)
 	}
-	collection, err := store.ConnectToCollection(session, "posts", []string{"account", "imgurl"})
+
+	collection, err := store.ConnectToCollection(
+		session, "posts", []string{"account", "imgurl"})
 	if err != nil {
 		panic(err)
 	}
+
 	post := &Post{
 		Id: p.Id,
 		Timestamp: p.Timestamp,
@@ -63,12 +73,14 @@ func (p *Post) Save() error {
 		return err
 	}
 
+	collection, err = store.ConnectToCollection(
+		session, "accounts", []string{"username", "title"})
+	if err != nil {
+		panic(err)
+	}
 
-	collection, err = store.ConnectToCollection(session, "accounts", []string{"username", "title"})
-	if err != nil {panic(err)}
-
-	err = collection.Update(bson.M{"title": p.Account}, bson.M{"$push": bson.M{"posts": post}})
-
+	err = collection.Update(
+		bson.M{"title": p.Account}, bson.M{"$push": bson.M{"posts": post}})
 	if err != nil {
 		return  err
 	}
@@ -77,24 +89,29 @@ func (p *Post) Save() error {
 }
 
 func FindPostById(accountId string, postId string) (*Post, error) {
+
 	session, err := store.ConnectToDb()
 	defer session.Close()
 	if err != nil {
 		panic(err)
 	}
-	collection, err := store.ConnectToCollection(session, "accounts", []string{"username", "title"})
+
+	collection, err := store.ConnectToCollection(
+		session, "accounts", []string{"username", "title"})
 	if err != nil {
 		panic(err)
 	}
 
 	fmt.Print("about to look")
-
 	post := Post{}
-	err = collection.Update(bson.M{"id": bson.ObjectIdHex(accountId)}, bson.M{"$set": bson.M{"posts.$.approved": true}})
+	err = collection.Update(
+		bson.M{"id": bson.ObjectIdHex(
+			accountId)}, bson.M{"$set": bson.M{"posts.$.approved": true}})
 	fmt.Print(err)
 	if err != nil {
 		return &post, err
 	}
+
 	return &post, err
 }
 

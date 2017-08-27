@@ -13,6 +13,7 @@ import (
 
 
 func SearchController(c echo.Context) error {
+
 	socialNetwork := c.Param("socialNetwork")
 	// searchTermString := c.Param("searchTerm")
 	acctTitle := c.Param("acctTitle")
@@ -25,23 +26,42 @@ func SearchController(c echo.Context) error {
 	// 	searchTerm.Save()
 	// }
 	results := Search(username, acctTitle, socialNetwork, searchTerm)
-	CreatePostFromResults(username, acctTitle, searchTerm, socialNetwork, results)
+	CreatePostFromResults(
+		username, acctTitle, searchTerm, socialNetwork, results)
 
 	return c.JSON(http.StatusOK, results)
 }
 
 
-func Search(username string, acctTitle string, socialNetwork string, searchTerm string) anaconda.SearchResponse {
+func Search(
+	username string,
+	acctTitle string,
+	socialNetwork string,
+	searchTerm string) anaconda.SearchResponse {
+
 	switch socialNetwork {
 	case "twitter-img":
-		return SearchTwitter(username, acctTitle, searchTerm, "100", " filter:twimg")
+
+		return SearchTwitter(
+			username,
+			acctTitle,
+			searchTerm,
+			"100",
+			" filter:twimg",
+		)
 	default:
 		panic("unrecognized escape character")
 	}
 }
 
 
-func SearchTwitter(username string, acctTitle string, searchTerm string, count string, searchType string) anaconda.SearchResponse {
+func SearchTwitter(
+	username string,
+	acctTitle string,
+	searchTerm string,
+	count string,
+	searchType string) anaconda.SearchResponse {
+
 	v := url.Values{}
 	// s := strconv.FormatInt(searchTerm.SinceTweetId, 10)
 	// v.Set("since_id", s)
@@ -49,7 +69,9 @@ func SearchTwitter(username string, acctTitle string, searchTerm string, count s
 	updatedSearch := searchTerm + searchType
 	api := AuthTwitter(username, acctTitle)
 	search_result, err := api.GetSearch(updatedSearch, v)
-	if err != nil {panic(err)}
+	if err != nil {
+		panic(err)
+	}
 
 	return search_result
 }
@@ -76,8 +98,9 @@ func SearchAndFavorite(c echo.Context) error {
 	v.Add("count", "100")
 	// updatedSearch := favoriteTerm.Text
 	search_result, err := api.GetSearch(searchTermString, v)
-	if err != nil {panic(err)}
-
+	if err != nil {
+		panic(err)
+	}
 
 	var succeses = 0
 	var failures = 0
@@ -88,6 +111,7 @@ func SearchAndFavorite(c echo.Context) error {
 			succeses = succeses + 1
 			fmt.Print(" Success!")
 		}
+
 		if err != nil {
 			failures = failures + 1
 			fmt.Print("error!")
@@ -96,8 +120,13 @@ func SearchAndFavorite(c echo.Context) error {
 	}
 	fmt.Print(succeses)
 
-
-	return c.JSON(http.StatusOK, fmt.Sprintf("AccountId %s just favorited %v new tweets, and failed %v times", accountId, succeses, failures))
+	return c.JSON(
+		http.StatusOK,
+		fmt.Sprintf(
+			"AccountId %s just favorited %v new tweets, and failed %v times",
+			accountId,
+			succeses,
+			failures))
 }
 
 

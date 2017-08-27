@@ -10,22 +10,31 @@ import (
 )
 
 func CreateUserController(c echo.Context) error {
+
 	username := c.FormValue("username")
 	password := c.FormValue("password")
 	user := models.NewUserModel(username, password)
 	err := user.Save()
 	if err != nil {
-		return c.JSON(http.StatusForbidden, "We're sorry! There's already a user with that username..")
+
+		return c.JSON(
+			http.StatusForbidden,
+			"We're sorry! There's already a user with that username..")
 	}
+
 	return c.JSON(http.StatusOK, user)
 }
 
 
 func LoginUserController(c echo.Context) error {
+
 	username := c.FormValue("username")
 	password := c.FormValue("password")
 	user, err := models.FindUserModel(username)
-	if err != nil {panic(err)}
+	if err != nil {
+		panic(err)
+	}
+
 	if user.Password == password {
 		token := jwt.New(jwt.SigningMethodHS256)
 
@@ -38,6 +47,7 @@ func LoginUserController(c echo.Context) error {
 		if err != nil {
 			return err
 		}
+
 		return c.JSON(http.StatusOK, map[string]string{
 			"token": t,
 		})
@@ -47,15 +57,18 @@ func LoginUserController(c echo.Context) error {
 }
 
 func GetUserController(c echo.Context) error {
+
 	username := c.Param("username")
 	user, err := models.FindUserModel(username)
 	if err != nil {
 		return err
-	}	
+	}
+
 	return c.JSON(http.StatusOK, user)
 }
 
 func UpdateUserController(c echo.Context) error {
+
 	username := c.Param("username")
 	password := c.FormValue("password")
 	models.UpdateUserModel(username, password)
@@ -63,11 +76,13 @@ func UpdateUserController(c echo.Context) error {
 	if err != nil {
 		return err
 	}	
+
 	return c.JSON(http.StatusOK, user)
 }
 
 
 func RemoveUserController(c echo.Context) error {
+
 	username := c.Param("username")
 	err := models.DeleteUserModel(username)
 	if err != nil {
