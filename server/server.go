@@ -6,7 +6,6 @@ import (
 
 	"github.com/labstack/echo"
 	"github.com/labstack/echo/middleware"
-	"github.com/labstack/echo/engine/standard"
 )
 
 
@@ -86,5 +85,5 @@ func Run() {
 
 
 	fmt.Println("Server now running on port: 1323")
-	e.Run(standard.New(":1323"))
+	e.Logger.Fatal(e.Start(":1323"))
 }
