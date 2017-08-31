@@ -2,18 +2,23 @@ package server
 
 import (
 	"net/http"
-
 	"time"
+
 	"github.com/hathbanger/butterfli-api/models"
+
 	"github.com/labstack/echo"
 	"github.com/dgrijalva/jwt-go"
 )
 
 func CreateUserController(c echo.Context) error {
 
-	username := c.FormValue("username")
-	password := c.FormValue("password")
-	user := models.NewUserModel(username, password)
+	new_user := &models.User{}
+	if err := c.Bind(new_user); err != nil {
+		return err
+	}
+
+	user := models.NewUser(new_user.Username, new_user.Password)
+
 	err := user.Save()
 	if err != nil {
 
@@ -30,6 +35,7 @@ func LoginUserController(c echo.Context) error {
 
 	username := c.FormValue("username")
 	password := c.FormValue("password")
+
 	user, err := models.FindUserModel(username)
 	if err != nil {
 		panic(err)

@@ -35,13 +35,13 @@ func Run() {
 
 	e.POST("/login", LoginUserController)
 
+	//TODO: Refactor to use JSON payload instead of form
 	e.POST("/user", CreateUserController)
 	e.GET("/:username", GetUserController)
 	e.POST("/:username/update", UpdateUserController)
 	e.POST("/:username/delete", RemoveUserController)
 
 	// TODO: Refactor to use .jwt instead of :username
-
 	e.POST("/:username/accounts/create", CreateAccountController)
 	e.GET("/:username/accounts/:title", GetAccountController)
 	e.POST("/:username/accounts/update/:title", UpdateAccountController)

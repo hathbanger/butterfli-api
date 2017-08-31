@@ -20,7 +20,7 @@ type User struct {
 }
 
 
-func NewUserModel(username string, password string) *User {
+func NewUser(username string, password string) *User {
 
 	u := new(User)
 	u.Id = bson.NewObjectId()
