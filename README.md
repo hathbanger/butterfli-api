@@ -63,6 +63,9 @@ Add additional notes about how to deploy this on a live system
 
 * [Echo](https://github.com/labstack/echo)
 
+## API Specification
+
+[Here](docs/api-spec.md)
 
 ## Authors
 

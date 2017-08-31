@@ -26,6 +26,7 @@ func Run() {
 	}))
 
 	// TODO: Implement restful architecture
+	// TODO: Refactor controller names to purge 'Controller'
 
 	// ROUTES
 	e.GET("/", accessible)
@@ -39,11 +40,13 @@ func Run() {
 	e.POST("/:username/update", UpdateUserController)
 	e.POST("/:username/delete", RemoveUserController)
 
-	
+	// TODO: Refactor to use .jwt instead of :username
+
 	e.POST("/:username/accounts/create", CreateAccountController)
 	e.GET("/:username/accounts/:title", GetAccountController)
 	e.POST("/:username/accounts/update/:title", UpdateAccountController)
 	e.POST("/:username/accounts/delete/:title", DeleteAccountController)
+
 
 
 	e.GET("/:username/accounts/:title/account-creds", FindAccountCredsController)
