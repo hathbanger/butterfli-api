@@ -2,15 +2,12 @@ package store
 
 import (
 	"labix.org/v2/mgo"
-	"os"
 	"fmt"
 )
 
 func ConnectToDb() (*mgo.Session, error) {
 
-	hostname := os.Getenv("MONGO_PORT_27017_TCP_ADDR")
-	port := os.Getenv("MONGO_PORT_27017_TCP_PORT")
-	url := hostname + ":" + port
+	url := "localhost:27017"
 	session, err := mgo.Dial(url)
 	if err != nil {
 		panic(err)
@@ -23,6 +20,7 @@ func ConnectToCollection(
 	session *mgo.Session,
 	collection_str string,
 	keyString []string) (*mgo.Collection, error) {
+	
 
 	collection := session.DB("butterfli").C(collection_str)
 	index := mgo.Index{

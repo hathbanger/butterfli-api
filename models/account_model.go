@@ -72,7 +72,7 @@ func (a *Account) Save() error {
 }
 
 
-func FindAccountModel(username string, title string) (*Account, error) {
+func FindAccountModel(username string, id string) (*Account, error) {
 
 	session, err := store.ConnectToDb()
 	defer session.Close()
@@ -88,7 +88,7 @@ func FindAccountModel(username string, title string) (*Account, error) {
 
 	account := Account{}
 	err = collection.Find(
-		bson.M{"username": username, "title": title}).One(&account)
+		bson.M{"id": bson.ObjectIdHex(id)}).One(&account)
 	if err != nil {
 		panic(err)
 	}

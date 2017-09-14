@@ -71,9 +71,9 @@ func DeleteAccountController(c echo.Context) error {
 
 
 func FindAccountCredsController(c echo.Context) error {
-	username := c.Param("username")
+
 	acctTitle := c.Param("title")
-	accountCreds, err := models.FindAccountCredsModel(username, acctTitle)
+	accountCreds, err := models.FindAccountCredsModel(acctTitle)
 	if err != nil {
 		return c.JSON(
 			http.StatusForbidden, "" +

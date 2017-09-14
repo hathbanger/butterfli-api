@@ -2,7 +2,7 @@ package server
 
 
 import (
-
+	"github.com/hathbanger/butterfli-api/models"
 	"github.com/labstack/echo"
 	"github.com/ChimeraCoder/anaconda"
 	"net/http"
@@ -15,19 +15,19 @@ import (
 func SearchController(c echo.Context) error {
 
 	socialNetwork := c.Param("socialNetwork")
-	// searchTermString := c.Param("searchTerm")
+	// searchTermString := "catsareassholes"
 	acctTitle := c.Param("acctTitle")
 	username := c.Param("username")
-	searchTerm := c.FormValue("searchTerm")
-	// searchTerm, err := models.FindSearchTerm(accountId, searchTermString)
+	searchTermString := c.FormValue("searchTerm")
+	// searchTerm, err := models.FindSearchTerm(acctTitle, searchTermString)
 	// if err != nil {
-	// 	fmt.Print("WOAH! NEW TERM")
 	// 	searchTerm = models.NewSearchTerm(accountId, searchTermString)
 	// 	searchTerm.Save()
 	// }
-	results := Search(username, acctTitle, socialNetwork, searchTerm)
+	fmt.Println("searchTermString", searchTermString)
+	results := Search(username, acctTitle, socialNetwork, searchTermString)
 	CreatePostFromResults(
-		username, acctTitle, searchTerm, socialNetwork, results)
+		username, acctTitle, searchTermString, socialNetwork, results)
 
 	return c.JSON(http.StatusOK, results)
 }
@@ -46,7 +46,7 @@ func Search(
 			username,
 			acctTitle,
 			searchTerm,
-			"100",
+			"10",
 			" filter:twimg",
 		)
 	default:
@@ -78,37 +78,53 @@ func SearchTwitter(
 
 func SearchAndFavorite(c echo.Context) error {
 
+	fmt.Println("WOWWWW")
 	acctTitle := c.Param("acctTitle")
 	username := c.Param("username")
 	searchTermString := c.FormValue("searchTerm")
+
+	fmt.Println(acctTitle)
 
 	// searchTermString := c.Param("searchTerm")
 	accountId := c.Param("accountId")
 
 	api := AuthTwitter(username, acctTitle)
-	// favoriteTerm, err := models.FindFavoriteTerm(accountId, searchTermString)
-	// if err != nil {
-	// 	favoriteTerm = models.NewFavoriteTerm(accountId, searchTermString)
-	// 	favoriteTerm.Save()
+	searchTerm, err := models.FindSearchTerm(accountId, searchTermString)
+
+	fmt.Print("WOAH! NEW TERM\n\n")
+	fmt.Print(err)
+	fmt.Print("That was an Err\n\n")
+	fmt.Print(searchTerm)
+	fmt.Print("\n this was a searchterm\n\n")
+
+	// if searchTerm != nil {
+	// 	searchTerm = models.NewSearchTerm(accountId, searchTermString)
+	// 	searchTerm.Save()
+
+	// 	fmt.Print("\n\nSAVEDDDD! NEW TERM\n\n")
+	// 	fmt.Print(err)
+	// 	fmt.Print(searchTerm.Text)
+	// 	fmt.Print("\nNEW TERM\n\n")
 	// }
+
 	//results := Search(username, accountId, socialNetwork, *favoriteTerm)
 	v := url.Values{}
 	// s := strconv.FormatInt(favoriteTerm.SinceTweetId, 10)
 	// v.Set("since_id", s)
-	v.Add("count", "100")
+	v.Add("count", "10")
 	// updatedSearch := favoriteTerm.Text
 	search_result, err := api.GetSearch(searchTermString, v)
 	if err != nil {
 		panic(err)
 	}
 
-	var succeses = 0
+	var successes = 0
 	var failures = 0
 	for _, tweet := range search_result.Statuses {
 		res, err := api.Favorite(tweet.Id)
 		// models.UpdateFavoriteTerm(favoriteTerm, tweet.Id)
 		if res.Id != 0  {
-			succeses = succeses + 1
+			successes = successes + 1
 			fmt.Print(" Success!")
 		}
 
@@ -118,14 +134,14 @@ func SearchAndFavorite(c echo.Context) error {
 			fmt.Print(err)
 		}
 	}
-	fmt.Print(succeses)
+	fmt.Print(successes)
 
 	return c.JSON(
 		http.StatusOK,
 		fmt.Sprintf(
 			"AccountId %s just favorited %v new tweets, and failed %v times",
 			accountId,
-			succeses,
+			successes,
 			failures))
 }
 

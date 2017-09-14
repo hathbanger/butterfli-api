@@ -2,7 +2,7 @@ package models
 
 import (
 	"time"
-	// "fmt"
+	"fmt"
 
 	"labix.org/v2/mgo/bson"
 	"github.com/hathbanger/butterfli-api/store"
@@ -31,6 +31,8 @@ func NewUserModel(username string, password string) *User {
 }
 
 func (u *User) Save() error {
+
+	fmt.Print("SAVING USER")
 
 	session, err := store.ConnectToDb()
 	defer session.Close()

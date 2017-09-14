@@ -55,7 +55,9 @@ func Run() {
 
 
 	e.GET("/:accountId/posts/:postId", FindPostController)
-	// e.POST("/post/approve/:postId", ApprovePostController)
+
+	e.GET("/:username/accounts/:account_id/posts", FindAllAccountPosts)
+	
 
 	// e.GET("/:username/accounts", GetAllAccountsByUsername)
 	// e.GET("/users", GetAllUsers)
@@ -66,9 +68,10 @@ func Run() {
 	// e.POST("/user", CreateUser)
 
 
-	// e.POST("/post/edit/:postId/title/:title", EditPost)
-	// e.POST("/post/disapprove/:postId", DisapprovePost)
-	// e.POST("/:username/accounts/:account_id/post/delete/:postId", RemovePost)
+	e.POST("/post/edit/:postId/title/:title", EditPost)
+	e.POST("/post/approve/:postId", ApprovePost)
+	e.POST("/post/disapprove/:postId", DisapprovePost)
+	e.POST("/:username/accounts/:account_id/post/delete/:postId", RemovePost)
 	// e.POST("/:username/accounts/:account_id/post/:postId/upload/twitter/:tweetText", PostTweet)
 	// e.POST("/:username/accounts/:accountId/twitter/creds", UpdateAccountCredsController)
 
@@ -83,7 +86,8 @@ func Run() {
 	// // NOT TESTED
 	// e.POST("/:username/accounts/create/:title", CreateAccount)
 
+	fmt.Println("RUNNING from RUN!")
 
-	fmt.Println("Server now running on port: 1323")
+	fmt.Println("Server now running on this port: 1323")
 	e.Logger.Fatal(e.Start(":1323"))
 }

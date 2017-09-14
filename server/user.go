@@ -11,6 +11,7 @@ import (
 
 func CreateUserController(c echo.Context) error {
 
+
 	username := c.FormValue("username")
 	password := c.FormValue("password")
 	user := models.NewUserModel(username, password)

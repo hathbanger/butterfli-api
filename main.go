@@ -1,10 +1,13 @@
 package main
 
 import (
+	"fmt"
 	"github.com/hathbanger/butterfli-api/server"
 )
 
 func main() {
+
+	fmt.Print("RUNNING!")
 	// TODO: Refector all error handling.. way to much panicing
 	// TODO: Implement logging
 	// TODO: Implement PostIds in account struct instead of posts composition.. will need to seperate Posts into new collection.. ect

@@ -61,7 +61,7 @@ func (a *AccountCreds) Save() error {
 
 
 func FindAccountCredsModel(
-	username string, title string) (*AccountCreds, error) {
+	id string) (*AccountCreds, error) {
 
 	session, err := store.ConnectToDb()
 	defer session.Close()
@@ -70,7 +70,7 @@ func FindAccountCredsModel(
 	
 	account := Account{}
 	err = collection.Find(
-		bson.M{"username": username, "title": title}).One(&account)
+		bson.M{"id": bson.ObjectIdHex(id)}).One(&account)
 	if err != nil {
 		fmt.Print(err)
 	}

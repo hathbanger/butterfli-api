@@ -68,21 +68,12 @@ func (p *Post) Save() error {
 		OGSourceId: p.OGSourceId,
 		Rated: p.Rated}
 
+	fmt.Println("\n\tABOUT TO SAVE A NEW POST\n")
+
 	err = collection.Insert(post)
 	if err != nil {
+		fmt.Println("ERRRROR")
 		return err
-	}
-
-	collection, err = store.ConnectToCollection(
-		session, "accounts", []string{"username", "title"})
-	if err != nil {
-		panic(err)
-	}
-
-	err = collection.Update(
-		bson.M{"title": p.Account}, bson.M{"$push": bson.M{"posts": post}})
-	if err != nil {
-		return  err
 	}
 
 	return nil
@@ -115,6 +106,25 @@ func FindPostById(accountId string, postId string) (*Post, error) {
 	return &post, err
 }
 
+func GetAllAccountPosts(accountId string) ([]*Post, error){
+	session, err := store.ConnectToDb()
+	defer session.Close()
+	if err != nil {
+		panic(err)
+	}
+	collection, err := store.ConnectToCollection(
+		session, "posts", []string{"account", "imgurl"})
+	if err != nil {
+		panic(err)
+	}
+	posts := []*Post{}
+	fmt.Println(accountId)
+	// whereString := "this.rated == false || this.approved == true"
+	err = collection.Find(bson.M{"account": accountId}).All(&posts)
+	fmt.Println(posts)
+	return posts, err
+}
+
 
 // func ApprovePostById(postId string) error {
 // 	session, err := store.ConnectToDb()
@@ -135,69 +145,72 @@ func FindPostById(accountId string, postId string) (*Post, error) {
 // 	return nil
 // }
 
-// func ApprovePostById(postId string) error {
-// 	session, err := store.ConnectToDb()
-	
-// 	collection := session.DB("test").C("posts")
-
-// 	colQuerier := bson.M{"id": bson.ObjectIdHex(postId)}
-// 	change := bson.M{"$set": bson.M{ "approved": true, "rated": true }}
-// 	err = collection.Update(colQuerier, change)
-// 	if err != nil {
-// 		panic(err)
-// 	}
-// 	return nil
-// }
-
-
-
-
-// func GetAllAccountPosts(accountId string) ([]*Post, error){
-// 	session, err := store.ConnectToDb()
-// 	defer session.Close()
-// 	if err != nil {
-// 		panic(err)
-// 	}
-// 	collection := session.DB("test").C("posts")
-// 	posts := []*Post{}
-// 	whereString := "this.rated == false || this.approved == true"
-// 	err = collection.Find(bson.M{"$where": whereString, "account": accountId}).All(&posts)
-// 	return posts, err
-// }
-
-// func DeletePost(id string) error {
-// 	session, err := store.ConnectToDb()
-// 	collection := session.DB("test").C("posts")
-// 	err = collection.Remove(bson.M{"id": bson.ObjectIdHex(id)})
-// 	if err != nil {
-// 		panic(err)
-// 	}
-// 	return nil
-// }
-
-
-// func EditPostTitleById(postId string, title string) error {
-// 	session, err := store.ConnectToDb()
-// 	collection := session.DB("test").C("posts")
-// 	colQuerier := bson.M{"id": bson.ObjectIdHex(postId)}
-// 	change := bson.M{"$set": bson.M{ "title": title }}
-// 	err = collection.Update(colQuerier, change)
-// 	if err != nil {panic(err)}
-
-// 	return nil
-// }
+func ApprovePostById(postId string) error {
+	session, err := store.ConnectToDb()
+	collection, err := store.ConnectToCollection(
+		session, "posts", []string{"account", "imgurl"})
+	if err != nil {
+		panic(err)
+	}
+	colQuerier := bson.M{"id": bson.ObjectIdHex(postId)}
+	change := bson.M{"$set": bson.M{ "approved": true, "rated": true }}
+	err = collection.Update(colQuerier, change)
+	if err != nil {
+		panic(err)
+	}
+	return nil
+}
 
 
 
-// func DisapprovePostById(postId string) error {
-// 	session, err := store.ConnectToDb()
-// 	collection := session.DB("test").C("posts")
-// 	colQuerier := bson.M{"id": bson.ObjectIdHex(postId)}
-// 	change := bson.M{"$set": bson.M{ "approved": false, "rated": true }}
-// 	err = collection.Update(colQuerier, change)
-// 	if err != nil {
-// 		panic(err)
-// 	}
-// 	return nil
-// }
+
+func DisapprovePostById(postId string) error {
+	session, err := store.ConnectToDb()
+	collection, err := store.ConnectToCollection(
+		session, "posts", []string{"account", "imgurl"})
+	if err != nil {
+		panic(err)
+	}	
+	colQuerier := bson.M{"id": bson.ObjectIdHex(postId)}
+	change := bson.M{"$set": bson.M{ "approved": false, "rated": true }}
+	err = collection.Update(colQuerier, change)
+	if err != nil {
+		panic(err)
+	}
+	return nil
+}
+
+
+
+func DeletePost(id string) error {
+	session, err := store.ConnectToDb()
+	collection, err := store.ConnectToCollection(
+		session, "posts", []string{"account", "imgurl"})
+	if err != nil {
+		panic(err)
+	}	
+	err = collection.Remove(bson.M{"id": bson.ObjectIdHex(id)})
+	if err != nil {
+		panic(err)
+	}
+	return nil
+}
+
+
+func EditPostTitleById(postId string, title string) error {
+	session, err := store.ConnectToDb()
+	collection, err := store.ConnectToCollection(
+		session, "posts", []string{"account", "imgurl"})
+	if err != nil {
+		panic(err)
+	}
+	colQuerier := bson.M{"id": bson.ObjectIdHex(postId)}
+	change := bson.M{"$set": bson.M{ "title": title }}
+	err = collection.Update(colQuerier, change)
+	if err != nil {panic(err)}
+
+	return nil
+}
+
+
 

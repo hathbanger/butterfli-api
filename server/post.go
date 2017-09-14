@@ -30,6 +30,7 @@ func CreatePostFromResults(
 		if len(tweet.Entities.Media) > 0 {
 			count = count + 1
 			imgurl :=  tweet.Entities.Media[0].Media_url
+			fmt.Println("\nimgurl", imgurl)
 			sinceTweetId = tweet.Id
 			strArr := strings.Split(tweet.Text, " ")
 			fmt.Printf("%q\n", strArr[:len(strArr) - 1])
@@ -60,47 +61,54 @@ func FindPostController(c echo.Context) error {
 	return c.JSON(http.StatusOK, post)
 }
 
-// func FindAllAccountPosts(c echo.Context) error {
-// 	accountId := c.Param("account_id")
-// 	posts, err := models.GetAllAccountPosts(accountId)
-// 	if err != nil {
-// 		panic(err)
-// 	}
+func FindAllAccountPosts(c echo.Context) error {
+	accountId := c.Param("account_id")
+	posts, err := models.GetAllAccountPosts(accountId)
+	if err != nil {
+		panic(err)
+	}
 
-// 	return c.JSON(http.StatusOK, posts)
-// }
+	return c.JSON(http.StatusOK, posts)
+}
 
-// func EditPost(c echo.Context) error {
-// 	postId := c.Param("postId")
-// 	title := c.Param("title")
-// 	err := models.EditPostTitleById(postId, title)
-// 	if err != nil {
-// 		return c.JSON(http.StatusNotFound, "not approved")
-// 	}
-// 	return c.JSON(http.StatusOK, "approved!")
-// }
+func EditPost(c echo.Context) error {
+	postId := c.Param("postId")
+	title := c.Param("title")
+	err := models.EditPostTitleById(postId, title)
+	if err != nil {
+		return c.JSON(http.StatusNotFound, "not approved")
+	}
+	return c.JSON(http.StatusOK, "approved!")
+}
+
+func ApprovePost(c echo.Context) error {
+	postId := c.Param("postId")
+	err := models.ApprovePostById(postId)
+	if err != nil {
+		return c.JSON(http.StatusNotFound, "not approved")
+	}
+	return c.JSON(http.StatusOK, "approved!")
+}
+
+func DisapprovePost(c echo.Context) error {
+	postId := c.Param("postId")
+	err := models.DisapprovePostById(postId)
+	if err != nil {
+		return c.JSON(http.StatusNotFound, "failure")
+	}
+	return c.JSON(http.StatusOK, "disapproved!")
+}
 
 
+func RemovePost(c echo.Context) error {
+	postId := c.Param("postId")
+	err := models.DeletePost(postId)
+	if err != nil {
+		return c.JSON(http.StatusNotFound, "not able to remove the post..")
+	}
 
-// func DisapprovePost(c echo.Context) error {
-// 	postId := c.Param("postId")
-// 	err := models.DisapprovePostById(postId)
-// 	if err != nil {
-// 		return c.JSON(http.StatusNotFound, "failure")
-// 	}
-// 	return c.JSON(http.StatusOK, "disapproved!")
-// }
-
-
-// func RemovePost(c echo.Context) error {
-// 	postId := c.Param("postId")
-// 	err := models.DeletePost(postId)
-// 	if err != nil {
-// 		return c.JSON(http.StatusNotFound, "not able to remove the post..")
-// 	}
-
-// 	return c.JSON(http.StatusOK, "worked!!")
-// }
+	return c.JSON(http.StatusOK, "worked!!")
+}
 
 // func PostTweet(c echo.Context) error {
 // 	accountId := c.Param("account_id")
