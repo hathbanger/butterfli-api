@@ -143,28 +143,25 @@ func UpdateAccountModel(
 }
 
 
-func DeleteAccountModel(username string, title string) error {
-
+func DeleteAccountModel(id string) error {
 	session, err := store.ConnectToDb()
 	defer session.Close()
 	if err != nil {
 		fmt.Print(err)
 	}
-
 	collection, err := store.ConnectToCollection(
 		session, "accounts", []string{"title", "username"})
 	if err != nil {
 		fmt.Print(err)
 	}
 
-	err = collection.Remove(bson.M{"title": title, "username": username})
+	err = collection.Remove(bson.M{"id": bson.ObjectIdHex(id)})
 	if err != nil {
 		fmt.Print(err)
 	}
 
 	return err
 }
-
 
 
 // func FindAccountById(account_id string) (*Account, error) {

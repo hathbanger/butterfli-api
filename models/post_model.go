@@ -68,8 +68,6 @@ func (p *Post) Save() error {
 		OGSourceId: p.OGSourceId,
 		Rated: p.Rated}
 
-	fmt.Println("\n\tABOUT TO SAVE A NEW POST\n")
-
 	err = collection.Insert(post)
 	if err != nil {
 		fmt.Println("ERRRROR")

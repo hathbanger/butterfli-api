@@ -2,7 +2,7 @@ package server
 
 import (
 	"net/http"
-
+	"fmt"
 	"time"
 	"github.com/hathbanger/butterfli-api/models"
 	"github.com/labstack/echo"
@@ -10,8 +10,6 @@ import (
 )
 
 func CreateUserController(c echo.Context) error {
-
-
 	username := c.FormValue("username")
 	password := c.FormValue("password")
 	user := models.NewUserModel(username, password)
@@ -23,7 +21,20 @@ func CreateUserController(c echo.Context) error {
 			"We're sorry! There's already a user with that username..")
 	}
 
-	return c.JSON(http.StatusOK, user)
+	token := jwt.New(jwt.SigningMethodHS256)
+	claims := token.Claims.(jwt.MapClaims)
+	claims["name"] = user.Username
+	claims["admin"] = true
+	claims["exp"] = time.Now().Add(time.Hour * 72).Unix()
+
+	t, err := token.SignedString([]byte("secret"))
+	if err != nil {
+		return err
+	}
+	fmt.Println(t)
+	return c.JSON(http.StatusOK, map[string]string{
+			"token": t,
+		})
 }
 
 

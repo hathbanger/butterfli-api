@@ -8,7 +8,6 @@ import (
 )
 
 func CreateAccountController(c echo.Context) error {
-
 	username := c.Param("username")
 	title := c.FormValue("title")
 	account := models.NewAccountModel(username, title)
@@ -19,7 +18,6 @@ func CreateAccountController(c echo.Context) error {
 			"We're sorry! We couldn't create an account for you.",
 		)
 	}
-
 	return c.JSON(http.StatusOK, account)
 }
 
@@ -55,23 +53,18 @@ func UpdateAccountController(c echo.Context) error {
 }
 
 func DeleteAccountController(c echo.Context) error {
-
-	username := c.Param("username")
-	title := c.Param("title")
-	err := models.DeleteAccountModel(username, title)
+	accountId := c.Param("accountId")
+	err := models.DeleteAccountModel(accountId)
 	if err != nil {
 		return c.JSON(
 			http.StatusNotFound, "not able to remove the account..")
 	}
 
-	return c.JSON(http.StatusOK, "Account deleted!")	
+	return c.JSON(http.StatusOK, "Account deleted!")
 }
 
 
-
-
 func FindAccountCredsController(c echo.Context) error {
-
 	acctTitle := c.Param("title")
 	accountCreds, err := models.FindAccountCredsModel(acctTitle)
 	if err != nil {
@@ -80,7 +73,6 @@ func FindAccountCredsController(c echo.Context) error {
 				"We're sorry! There was an issue finding your acct creds..",
 		)
 	}
-
 	return c.JSON(http.StatusOK, accountCreds)
 }
 
