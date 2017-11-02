@@ -5,30 +5,32 @@ import (
 	"github.com/hathbanger/butterfli-api/models"
 	"github.com/labstack/echo"
 	"github.com/ChimeraCoder/anaconda"
-	"net/http"
-	"fmt"
 
+	"github.com/dghubble/go-twitter/twitter"
+
+
+
+
+	"net/http"
+	"time"
+	"fmt"
+	"strconv"
+	// "sync"
 	"net/url"
 )
 
 
 func SearchController(c echo.Context) error {
-
 	socialNetwork := c.Param("socialNetwork")
-	// searchTermString := "catsareassholes"
 	acctTitle := c.Param("acctTitle")
 	username := c.Param("username")
 	searchTermString := c.FormValue("searchTerm")
-	// searchTerm, err := models.FindSearchTerm(acctTitle, searchTermString)
-	// if err != nil {
-	// 	searchTerm = models.NewSearchTerm(accountId, searchTermString)
-	// 	searchTerm.Save()
-	// }
-	fmt.Println("searchTermString", searchTermString)
-	results := Search(username, acctTitle, socialNetwork, searchTermString)
+	searchTerm, err := models.FindSearchTerm(acctTitle, searchTermString)
+	results := Search(username, acctTitle, socialNetwork, searchTerm)
 	CreatePostFromResults(
-		username, acctTitle, searchTermString, socialNetwork, results)
+		username, acctTitle, searchTerm, socialNetwork, results)
 
+	fmt.Println(searchTerm, err)
 	return c.JSON(http.StatusOK, results)
 }
 
@@ -37,7 +39,7 @@ func Search(
 	username string,
 	acctTitle string,
 	socialNetwork string,
-	searchTerm string) anaconda.SearchResponse {
+	searchTerm *models.SearchTerm) anaconda.SearchResponse {
 
 	switch socialNetwork {
 	case "twitter-img":
@@ -58,17 +60,18 @@ func Search(
 func SearchTwitter(
 	username string,
 	acctTitle string,
-	searchTerm string,
+	searchTerm *models.SearchTerm,
 	count string,
 	searchType string) anaconda.SearchResponse {
 
 	v := url.Values{}
-	// s := strconv.FormatInt(searchTerm.SinceTweetId, 10)
-	// v.Set("since_id", s)
-	v.Add("count", count)
-	updatedSearch := searchTerm + searchType
+	s := strconv.FormatInt(searchTerm.SinceTweetId, 10)
+	v.Set("since_id_str", s)
+	v.Set("count", count)
+	updatedSearch := searchTerm.Text + searchType
 	api := AuthTwitter(username, acctTitle)
 	search_result, err := api.GetSearch(updatedSearch, v)
+	fmt.Println("\n\tWOOO: ", v)
 	if err != nil {
 		panic(err)
 	}
@@ -77,72 +80,137 @@ func SearchTwitter(
 }
 
 func SearchAndFavorite(c echo.Context) error {
-
-	fmt.Println("WOWWWW")
-	acctTitle := c.Param("acctTitle")
 	username := c.Param("username")
 	searchTermString := c.FormValue("searchTerm")
+	accountId := c.Param("acctTitle")
+	count := c.FormValue("count")
 
-	fmt.Println(acctTitle)
+	client := AuthTwitterClient(username, accountId)
+	i, _ := strconv.Atoi(count)
 
-	// searchTermString := c.Param("searchTerm")
-	accountId := c.Param("accountId")
 
-	api := AuthTwitter(username, acctTitle)
-	searchTerm, err := models.FindSearchTerm(accountId, searchTermString)
+	searchTerm, _ := models.FindSearchTerm(accountId, searchTermString)
 
-	fmt.Print("WOAH! NEW TERM\n\n")
-	fmt.Print(err)
-	fmt.Print("That was an Err\n\n")
-	fmt.Print(searchTerm)
-	fmt.Print("\n this was a searchterm\n\n")
-
-	// if searchTerm != nil {
-	// 	searchTerm = models.NewSearchTerm(accountId, searchTermString)
-	// 	searchTerm.Save()
-
-	// 	fmt.Print("\n\nSAVEDDDD! NEW TERM\n\n")
-	// 	fmt.Print(err)
-	// 	fmt.Print(searchTerm.Text)
-	// 	fmt.Print("\nNEW TERM\n\n")
-	// }
-
-	//results := Search(username, accountId, socialNetwork, *favoriteTerm)
-	v := url.Values{}
-	// s := strconv.FormatInt(favoriteTerm.SinceTweetId, 10)
-	// v.Set("since_id", s)
-	v.Add("count", "10")
-	// updatedSearch := favoriteTerm.Text
-	search_result, err := api.GetSearch(searchTermString, v)
-	if err != nil {
-		panic(err)
-	}
+	searchParams := &twitter.SearchTweetParams{
+		Query:      searchTermString,
+		Count:      i,
+		ResultType: "recent",
+		Lang:       "en",
+		SinceID: searchTerm.SinceTweetId,
+	}	
 
 	var successes = 0
 	var failures = 0
-	for _, tweet := range search_result.Statuses {
-		res, err := api.Favorite(tweet.Id)
-		// models.UpdateFavoriteTerm(favoriteTerm, tweet.Id)
-		if res.Id != 0  {
+	var tweetId int64
+
+
+	searchResult, _, _ := client.Search.Tweets(searchParams)
+	for _, tweet := range searchResult.Statuses {
+		favoriteParams := &twitter.FavoriteCreateParams{
+			ID:      tweet.ID,
+		}
+		_, http, _ := client.Favorites.Create(favoriteParams)
+		if http.StatusCode == 200 {
 			successes = successes + 1
-			fmt.Print(" Success!")
+			tweetId = favoriteParams.ID
 		}
 
-		if err != nil {
+		if http.StatusCode != 200 {
 			failures = failures + 1
-			fmt.Print("error!")
-			fmt.Print(err)
 		}
+
+		time.Sleep(time.Second * 12)
+		fmt.Printf("Favorited: %+v\n\n", tweet.Text)
 	}
-	fmt.Print(successes)
+
+	models.UpdateSearchTerm(searchTerm, tweetId)
+	fmt.Print(searchTerm)
+
+
+	fmt.Print("successes:", successes)
+	fmt.Print("failures:", failures, "\n")
+	fmt.Print("searchTerm:", searchTerm, "\n")
 
 	return c.JSON(
 		http.StatusOK,
 		fmt.Sprintf(
-			"AccountId %s just favorited %v new tweets, and failed %v times",
+			"\n\nAccountId %s just favorited %v new tweets, and failed %v times\n\n",
 			accountId,
 			successes,
 			failures))
+}
+
+func UnfavoriteTweetsLoop(c echo.Context, count int, successes int, failures int) (int, int) {
+	username := c.Param("username")
+	accountId := c.Param("acctTitle")
+
+	client := AuthTwitterClient(username, accountId)
+	searchParams := &twitter.FavoriteListParams{
+		Count: count,
+	}
+
+
+	fmt.Print("\n\nLoop starting\n")
+	
+	
+	listResults, _, _ := client.Favorites.List(searchParams)
+
+	resLen := len(listResults)
+	fmt.Print(count)
+	fmt.Print(resLen)
+
+	if resLen == 0 {return successes, failures}
+
+	for _, tweet := range listResults {
+		unfavoriteParams := &twitter.FavoriteDestroyParams{
+			ID:      tweet.ID,
+		}
+		_, http, _ := client.Favorites.Destroy(unfavoriteParams)
+		
+		if http.StatusCode == 200 {
+			successes = successes + 1
+		}
+		if http.StatusCode != 200 {
+			failures = failures + 1
+		}
+
+		time.Sleep(time.Second * 12)
+		fmt.Printf("Destroyed: %+v\n\n", tweet.Text)
+		fmt.Printf("successes: %+v", successes)
+		fmt.Printf(" failures: %+v\n\n", failures)
+
+		if count == successes { break }
+	}
+
+	if count > successes {
+		return UnfavoriteTweetsLoop(c, count, successes, failures)
+	}
+
+	return successes, failures
+
+}
+
+func UnfavoriteTweets(c echo.Context) error {
+	count := c.FormValue("count")
+	var successes = 0
+	var failures = 0
+	stringCount, _ := strconv.Atoi(count)
+
+	loopSuccess, loopFails := UnfavoriteTweetsLoop(c, stringCount, successes, failures)
+
+	successes += loopSuccess
+	failures += loopFails
+
+	fmt.Print("successes:", successes)
+	fmt.Print("failures:", failures, "\n")
+
+	return c.JSON(
+		http.StatusOK,
+		fmt.Sprintf(
+			"\n\nAccountId %s just unfavorited %v new tweets, and failed %v times\n\n",
+			"accountId",
+			"successfulUnfavorites",
+			"failures"))	
 }
 
 

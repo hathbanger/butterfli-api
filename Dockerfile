@@ -17,5 +17,5 @@ RUN go install github.com/hathbanger/butterfli-api
 # Set binary as entrypoint
 ENTRYPOINT /go/bin/butterfli-api
 
-# Expose default port (3000)
+# Expose default port (1323)
 EXPOSE 1323

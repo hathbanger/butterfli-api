@@ -104,6 +104,8 @@ func UpdateSearchTerm(searchTerm *SearchTerm, sinceTweetId int64) error {
 		fmt.Print("\nissssues!\n")
 	}
 
+	fmt.Print("\nBOOM, added sincetweetid\n", sinceTweetId, "   booooommm\n\n")
+
 	return err
 }
 

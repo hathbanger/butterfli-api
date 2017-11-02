@@ -7,20 +7,20 @@ import (
 	"github.com/labstack/echo"
 	"net/http"
 	"fmt"
-	// "io/ioutil"
-	// "encoding/base64"
-	// "net/url"
-	// "strconv"
+	"io/ioutil"
+	"encoding/base64"
+	"net/url"
+	"strconv"
 	"strings"
 	"github.com/ChimeraCoder/anaconda"
-	// "log"
+	"log"
 )
 
 
 func CreatePostFromResults(
 	username string,
 	accountTitle string,
-	searchTerm string,
+	searchTerm *models.SearchTerm,
 	socialNetwork string,
 	results anaconda.SearchResponse) anaconda.SearchResponse {
 
@@ -30,21 +30,21 @@ func CreatePostFromResults(
 		if len(tweet.Entities.Media) > 0 {
 			count = count + 1
 			imgurl :=  tweet.Entities.Media[0].Media_url
-			fmt.Println("\nimgurl", imgurl)
 			sinceTweetId = tweet.Id
+			tweetId := ""
 			strArr := strings.Split(tweet.Text, " ")
 			fmt.Printf("%q\n", strArr[:len(strArr) - 1])
 			fmt.Print("%q\n", len(strArr))
 			post := models.NewPost(
-				username, accountTitle, tweet.Text, sinceTweetId, imgurl)
+				username, accountTitle, tweet.Text, sinceTweetId, imgurl, tweetId)
 			err := post.Save()
 			if err != nil {
 				fmt.Print(" - - > Duplicate! \n")
 			}
+			models.UpdateSearchTerm(searchTerm, sinceTweetId)			
 
 		}
 	}
-	// models.UpdateSearchTerm(searchTerm, sinceTweetId)
 	// models.AddPostCountToSearchTerm(searchTerm, count)
 
 	return results
@@ -110,50 +110,48 @@ func RemovePost(c echo.Context) error {
 	return c.JSON(http.StatusOK, "worked!!")
 }
 
-// func PostTweet(c echo.Context) error {
-// 	accountId := c.Param("account_id")
-// 	postId := c.Param("postId")
-// 	tweetText := c.Param("tweetText")
-// 	fmt.Print("tweetText!")
-// 	fmt.Print(tweetText)
+func PostTweet(c echo.Context) error {
+	accountId := c.Param("account_id")
+	postId := c.Param("postId")
+	tweetText := c.Param("tweetText")
+	username := c.Param("username")
 
-// 	results := PostMediaToTwitter(accountId, postId, tweetText)
 
-// 	return c.JSON(http.StatusOK, results)
-// }
+	results := PostMediaToTwitter(username, accountId, postId, tweetText)
 
-// func PostMediaToTwitter(accountId string, postId string, text string) anaconda.Tweet {
-// 	post, err := models.FindPostById(postId)
-// 	res, err := http.Get(post.Imgurl)
-// 	if err != nil {
-// 		fmt.Print(err)
-// 	}
-// 	if err != nil {
-// 		log.Fatalf("http.Get -> %v", err)
-// 	}
-// 	data, err := ioutil.ReadAll(res.Body)
-// 	if err != nil {
-// 		log.Fatalf("ioutil.ReadAll -> %v", err)
-// 	}
-// 	api := AuthTwitter(accountId)
-// 	mediaResponse, err := api.UploadMedia(base64.StdEncoding.EncodeToString(data))
-// 	if err != nil {panic(err)}
+	return c.JSON(http.StatusOK, results)
+}
 
-// 	v := url.Values{}
-// 	v.Set("media_ids", strconv.FormatInt(mediaResponse.MediaID, 10))
-// 	res.Body.Close()
+func PostMediaToTwitter(username string, accountId string, postId string, text string) anaconda.Tweet {
+	post, err := models.FindPostById(accountId, postId)
+	res, err := http.Get(post.Imgurl)
+	if err != nil {
+		fmt.Print(err)
+	}
+	if err != nil {
+		log.Fatalf("http.Get -> %v", err)
+	}
+	data, err := ioutil.ReadAll(res.Body)
+	if err != nil {
+		log.Fatalf("ioutil.ReadAll -> %v", err)
+	}
+	api := AuthTwitter(username, accountId)
+	mediaResponse, err := api.UploadMedia(base64.StdEncoding.EncodeToString(data))
+	if err != nil {panic(err)}
 
-// 	fmt.Print("WOOO TEXT!")
+	v := url.Values{}
+	v.Set("media_ids", strconv.FormatInt(mediaResponse.MediaID, 10))
+	res.Body.Close()
 
-// 	fmt.Print(text)
+	u, err := url.QueryUnescape(text)
 
-// 	u, err := url.QueryUnescape(text)
-
-// 	result, err := api.PostTweet(u, v)
-// 	if err != nil {
-// 		fmt.Println(err)
-// 	} else {
-// 		fmt.Println(result)
-// 	}
-// 	return result
-// }
+	result, err := api.PostTweet(u, v)
+	if err != nil {
+		fmt.Println(err)
+	} else {
+		tweetId := result.IdStr
+		fmt.Println("\nresult: ", tweetId)
+		models.AddTweetIdToPost(postId, tweetId)
+	}
+	return result
+}

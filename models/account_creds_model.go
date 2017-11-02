@@ -24,6 +24,8 @@ type AccountCreds struct {
 
 func NewAccountCreds(username string, account string) *AccountCreds {
 
+	fmt.Println("New ACCOUNT CREDS")
+
 	a := new(AccountCreds)
 	a.Id = bson.NewObjectId()
 	a.Timestamp = time.Now()
@@ -42,7 +44,7 @@ func (a *AccountCreds) Save() error {
 	}
 
 	collection, err := store.ConnectToCollection(
-		session, "accounts", []string{"account"})
+		session, "accountCreds", []string{"account"})
 	if err != nil {
 		panic(err)
 	}
@@ -55,27 +57,31 @@ func (a *AccountCreds) Save() error {
 
 	err = collection.Insert(accountCreds)
 
+	fmt.Print("accountCreds in new accountCreds", accountCreds)
+
 	return nil
 }
 
 
 
-func FindAccountCredsModel(
-	id string) (*AccountCreds, error) {
+func FindAccountCredsModel(id string) (*AccountCreds, error) {
 
 	session, err := store.ConnectToDb()
 	defer session.Close()
 	collection, err := store.ConnectToCollection(
-		session, "accounts", []string{"account"})
+		session, "accountCreds", []string{"account"})
+
+	account, err := FindAccountModelId(id)
+
+	accountCreds := &AccountCreds{}
 	
-	account := Account{}
 	err = collection.Find(
-		bson.M{"id": bson.ObjectIdHex(id)}).One(&account)
+		bson.M{"id": bson.ObjectIdHex(account.AccountCreds.Id.Hex())}).One(&accountCreds)
 	if err != nil {
 		fmt.Print(err)
 	}
 
-	return account.AccountCreds, err
+	return accountCreds, err
 }
 
 
@@ -87,32 +93,35 @@ func UpdateAccountCredsModel(
 	accessToken string,
 	accessTokenSecret string) (*AccountCreds, error) {
 
-	account, err := FindAccountModel(username, title)
+	account, err := FindAccountModelId(title)
 	session, err := store.ConnectToDb()
 	creds := account.AccountCreds
 	defer session.Close()
 
 	collection, err := store.ConnectToCollection(
-		session, "accounts", []string{"account"})
+		session, "accountCreds", []string{"account"})
 	if err != nil {
 		fmt.Print(err)
 	}
 
-	colQuerier := bson.M{"id": account.Id}
+	fmt.Println("\ncreds", creds, "\nconsumkey", consumerKey)
+
+	colQuerier := bson.M{"id": creds.Id}
 	change := bson.M{
-		"$set": bson.M{ "accountcreds.consumerkey": newVar(
+		"$set": bson.M{ "consumerkey": newVar(
 			creds.ConsumerKey, consumerKey),
-			"accountcreds.consumersecret": newVar(
+			"consumersecret": newVar(
 				creds.ConsumerSecret, consumerSecret),
-			"accountcreds.accesstoken": newVar(
+			"accesstoken": newVar(
 				creds.AccessToken, accessToken),
-			"accountcreds.accesstokensecret": newVar(
+			"accesstokensecret": newVar(
 				creds.AccessTokenSecret,
 				accessTokenSecret)}}
 	err = collection.Update(colQuerier, change)
 
 	account, err = FindAccountModel(username, title)
 	creds = account.AccountCreds
+	fmt.Println("ACCT CREDS", creds)
 	if err != nil {
 		fmt.Print(err)
 	}
@@ -127,6 +136,23 @@ func newVar(a string, b string) string {
 
     return a
 }
+
+
+func DeleteAccountCredsModel(id string) error {
+
+	session, err := store.ConnectToDb()
+	defer session.Close()
+	collection, err := store.ConnectToCollection(
+		session, "accountCreds", []string{"account"})
+	
+	err = collection.Remove(bson.M{"id": bson.ObjectIdHex(id)})
+	if err != nil {
+		fmt.Print(err)
+	}
+	
+	return err
+}
+
 
 // func UpdateAccountCreds(accountCreds string, consumerKey string, consumerSecret string, accessToken string, accessTokenSecret string) error {
 // 	session, err := store.ConnectToDb()

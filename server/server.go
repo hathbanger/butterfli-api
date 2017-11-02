@@ -2,32 +2,37 @@
 package server
 
 import (
-	"fmt"
-
+	// "github.com/robfig/cron"
 	"github.com/labstack/echo"
-	"github.com/labstack/echo/middleware"
+	mw "github.com/labstack/echo/middleware"
+	// "time"
+	"fmt"
+	
 )
 
 
 func Run() {
 	e := echo.New()
-	e.Use(middleware.Logger())
-	e.Use(middleware.Recover())
+	e.Use(mw.Logger())
+	e.Use(mw.Recover())
 
 	// Restricted Access
 	r := e.Group("/restricted")
-	r.Use(middleware.JWT([]byte("secret")))
+	r.Use(mw.JWT([]byte("secret")))
 
 	// CORS
-	e.Use(middleware.CORSWithConfig(middleware.CORSConfig{
+	e.Use(mw.CORSWithConfig(mw.CORSConfig{
 		// AllowOrigins: []string{"http://localhost:3000", "https://butterfli.io"},
 		AllowOrigins: []string{"*"},
 		AllowMethods: []string{echo.GET, echo.PUT, echo.POST, echo.DELETE},
 	}))
 
-	// TODO: Implement restful architecture
+	// c := cron.New()
+	// c.AddFunc("@every 1m", func() { fmt.Println("\n\nEvery one minute\n\n") })
+	// c.Start()
 
 	// ROUTES
+
 	e.GET("/", accessible)
 	r.GET("", restricted)
 
@@ -45,6 +50,8 @@ func Run() {
 	e.POST("/:username/accounts/update/:title", UpdateAccountController)
 	e.POST("/:username/accounts/delete/:accountId", DeleteAccountController)
 
+	e.GET("/:username/accounts", GetAllAccountsController)
+
 
 	e.GET("/:username/accounts/:title/account-creds", FindAccountCredsController)
 	e.POST("/:username/accounts/:title/account-creds", UpdateAccountCredsController)
@@ -52,6 +59,7 @@ func Run() {
 
 	e.POST("/:username/accounts/:acctTitle/search/:socialNetwork", SearchController)
 	e.POST("/:username/accounts/:acctTitle/favorite/:socialNetwork", SearchAndFavorite)
+	e.POST("/:username/accounts/:acctTitle/unfavorite/:socialNetwork", UnfavoriteTweets)
 
 
 	e.GET("/:accountId/posts/:postId", FindPostController)
@@ -72,7 +80,7 @@ func Run() {
 	e.POST("/post/approve/:postId", ApprovePost)
 	e.POST("/post/disapprove/:postId", DisapprovePost)
 	e.POST("/:username/accounts/:account_id/post/delete/:postId", RemovePost)
-	// e.POST("/:username/accounts/:account_id/post/:postId/upload/twitter/:tweetText", PostTweet)
+	e.POST("/:username/accounts/:account_id/post/:postId/upload/twitter/:tweetText", PostTweet)
 	// e.POST("/:username/accounts/:accountId/twitter/creds", UpdateAccountCredsController)
 
 	// e.POST("/:username/botnet/favorite/:tweetId/accounts/:accountsArray", BotnetFavoriteTweet)

@@ -16,7 +16,7 @@ type User struct {
 	Timestamp 	time.Time	       	`json:"time",bson:"time,omitempty"`
 	Username	string           	`json:"username",bson:"username,omitempty"`
 	Password	string           	`json:"-",bson:"password,omitempty"`
-	Accounts 	[]*Account 			`json:"accounts",bson:"accounts,omitempty"`
+	Accounts 	[]*bson.ObjectId 			`json:"accounts",bson:"accounts,omitempty"`
 }
 
 

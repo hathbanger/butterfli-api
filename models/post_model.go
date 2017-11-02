@@ -19,6 +19,7 @@ type Post struct {
 	OGSourceId	int64				`json:"ogSourceId",bson:"ogSourceId,omitempty"`
 	Approved	bool           		`json:"approved",bson:"approved,omitempty"`
 	Rated		bool           		`json:"rated",bson:"rated,omitempty"`
+	TwitterId 	string				`json:"twitterid,bson:"twitterid,omitempty"`
 	// SearchTerm	SearchTerm           `json:"searchterm",bson:"searchterm,omitempty"`
 }
 
@@ -27,7 +28,8 @@ func NewPost(
 	accountTitle string,
 	title string,
 	ogSourceId int64,
-	imgUrl string) *Post {
+	imgUrl string,
+	tweetId string) *Post {
 
 	p := new(Post)
 	p.Id = bson.NewObjectId()
@@ -39,6 +41,7 @@ func NewPost(
 	p.Title = title
 	p.Approved = false
 	p.Rated = false
+	p.TwitterId = tweetId
 
 	return p
 }
@@ -66,7 +69,9 @@ func (p *Post) Save() error {
 		Title: p.Title,
 		Approved: p.Approved,
 		OGSourceId: p.OGSourceId,
-		Rated: p.Rated}
+		Rated: p.Rated,
+		TwitterId: p.TwitterId,
+		}
 
 	err = collection.Insert(post)
 	if err != nil {
@@ -86,17 +91,24 @@ func FindPostById(accountId string, postId string) (*Post, error) {
 	}
 
 	collection, err := store.ConnectToCollection(
-		session, "accounts", []string{"username", "title"})
+		session, "posts", []string{"account", "imgurl"})
 	if err != nil {
 		panic(err)
 	}
 
-	fmt.Print("about to look")
+	// collection, err := store.ConnectToCollection(
+	// 	session, "accounts", []string{"username", "title"})
+	// if err != nil {
+	// 	panic(err)
+	// }
+
 	post := Post{}
-	err = collection.Update(
-		bson.M{"id": bson.ObjectIdHex(
-			accountId)}, bson.M{"$set": bson.M{"posts.$.approved": true}})
-	fmt.Print(err)
+	
+	err = collection.Find(bson.M{"id": bson.ObjectIdHex(postId)}).One(&post)
+	// err = collection.Update(
+	// 	bson.M{"id": bson.ObjectIdHex(
+	// 		accountId)}, bson.M{"$set": bson.M{"posts.$.approved": true}})
+	// fmt.Print(err)
 	if err != nil {
 		return &post, err
 	}
@@ -127,7 +139,6 @@ func GetAllAccountPosts(accountId string) ([]*Post, error){
 // func ApprovePostById(postId string) error {
 // 	session, err := store.ConnectToDb()
 	
-	
 // 	collection, err := store.ConnectToCollection(session, "accounts", []string{"username", "title"})
 
 // 	// colQuerier := bson.M{"id": bson.ObjectIdHex(postId)}
@@ -142,6 +153,23 @@ func GetAllAccountPosts(accountId string) ([]*Post, error){
 // 	}
 // 	return nil
 // }
+
+func AddTweetIdToPost(postId string, tweetId string) error {
+	session, err := store.ConnectToDb()
+	collection, err := store.ConnectToCollection(
+		session, "posts", []string{"account", "imgurl"})
+	if err != nil {
+		panic(err)
+	}
+	colQuerier := bson.M{"id": bson.ObjectIdHex(postId)}
+	change := bson.M{"$set": bson.M{ "twitterid": tweetId }}
+	fmt.Print("\nadding tweetId: ", tweetId)
+	err = collection.Update(colQuerier, change)
+	if err != nil {
+		panic(err)
+	}
+	return nil
+}
 
 func ApprovePostById(postId string) error {
 	session, err := store.ConnectToDb()
@@ -158,8 +186,6 @@ func ApprovePostById(postId string) error {
 	}
 	return nil
 }
-
-
 
 
 func DisapprovePostById(postId string) error {

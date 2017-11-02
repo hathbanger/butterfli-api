@@ -21,6 +21,8 @@ type Account struct {
 
 func NewAccountModel(username string, title string) *Account {
 
+	fmt.Println("NEW ACCOUNT MODEL FIRE")
+
 	a := new(Account)
 	a.Id = bson.NewObjectId()
 	a.Timestamp = time.Now()
@@ -62,8 +64,11 @@ func (a *Account) Save() error {
 
 	err = collection.Update(
 		bson.M{"username": a.Username},
-		bson.M{"$push": bson.M{"accounts": a}},
+		bson.M{"$push": bson.M{"accounts": a.Id}},
 	)
+
+	fmt.Println("\nNEW ACCOUNT save")
+
 	if err != nil {
 		return  err
 	}
@@ -71,6 +76,30 @@ func (a *Account) Save() error {
 	return nil
 }
 
+
+func FindAllAccountsByUserModel(username string) ([]*Account, error) {
+
+	session, err := store.ConnectToDb()
+	defer session.Close()
+	if err != nil {
+		panic(err)
+	}
+
+	collection, err := store.ConnectToCollection(
+		session, "accounts", []string{"title", "username"})
+	if err != nil {
+		panic(err)
+	}
+
+	accounts := []*Account{}
+	err = collection.Find(
+		bson.M{"username": username}).All(&accounts)
+	if err != nil {
+		panic(err)
+	}
+
+	return accounts, err
+}
 
 func FindAccountModel(username string, id string) (*Account, error) {
 
@@ -155,10 +184,16 @@ func DeleteAccountModel(id string) error {
 		fmt.Print(err)
 	}
 
+	account, err := FindAccountModelId(id)
+
 	err = collection.Remove(bson.M{"id": bson.ObjectIdHex(id)})
 	if err != nil {
 		fmt.Print(err)
 	}
+
+	accountCreds := account.AccountCreds.Id.Hex()
+
+	err = DeleteAccountCredsModel(accountCreds)
 
 	return err
 }

@@ -4,7 +4,7 @@ import (
 	"github.com/labstack/echo"
 	"net/http"
 	"github.com/hathbanger/butterfli-api/models"
-	//"fmt"
+	// "fmt"
 )
 
 func CreateAccountController(c echo.Context) error {
@@ -35,6 +35,20 @@ func GetAccountController(c echo.Context) error {
 	}
 
 	return c.JSON(http.StatusOK, account)
+}
+
+func GetAllAccountsController(c echo.Context) error {
+
+	username := c.Param("username")
+	accounts, err := models.FindAllAccountsByUserModel(username)
+	if err != nil {
+		return c.JSON(
+			http.StatusForbidden,
+			"We're sorry! We couldn't get the account for you.",
+		)
+	}
+
+	return c.JSON(http.StatusOK, accounts)
 }
 
 
